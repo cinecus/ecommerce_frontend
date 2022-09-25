@@ -1,7 +1,11 @@
 import React from "react";
 import { Container, Card, Text, Row, Col, Button } from "@nextui-org/react";
+import { useAppSelector } from "../../store/store";
+import { cartItemType } from "../../types";
+import { numberFormat } from "../../function";
 
 const SummarySection = () => {
+  const { carts } = useAppSelector((state) => state.cart);
   return (
     <Container fluid>
       <Card>
@@ -21,30 +25,42 @@ const SummarySection = () => {
               <Text size={16}>ราคารวม</Text>
             </Col>
           </Row>
-          <Row justify="space-between">
-            <Col span={4}>
-              <Text size={16} css={{ color: "$accents8" }}>
-                2
-              </Text>
-            </Col>
-            <Col span={5}>
-              <Text size={16} css={{ color: "$accents8" }}>
-                Tony Reichert
-              </Text>
-            </Col>
-            <Col span={3}>
-              <Text size={16} css={{ color: "$accents8" }}>
-                20.00
-              </Text>
-            </Col>
-          </Row>
+          {carts.map((cartItem: cartItemType) => {
+            return (
+              <Row justify="space-between">
+                <Col span={4}>
+                  <Text size={16} css={{ color: "$accents8" }}>
+                    {cartItem.qty}
+                  </Text>
+                </Col>
+                <Col span={5}>
+                  <Text size={16} css={{ color: "$accents8" }}>
+                    {cartItem.product?.name}
+                  </Text>
+                </Col>
+                <Col span={3}>
+                  <Text size={16} css={{ color: "$accents8" }}>
+                    {numberFormat(cartItem.qty * cartItem.product?.price!)}
+                  </Text>
+                </Col>
+              </Row>
+            );
+          })}
+
           <Card.Divider />
           <Row css={{ py: "$5", gap: "$3", alignItems: "center" }}>
             <Text size={16} b>
               ยอดทั้งหมด :
             </Text>
             <Text size={16} css={{ color: "$accents8" }}>
-              00.00 บาท
+              {numberFormat(
+                carts.reduce(
+                  (prev: number, cur: cartItemType) =>
+                    prev + cur.qty * cur.product?.price!,
+                  0
+                )
+              )}{" "}
+              บาท
             </Text>
           </Row>
           <Row css={{ gap: "$3", alignItems: "center" }}>
@@ -61,7 +77,14 @@ const SummarySection = () => {
               ยอดที่ต้องชำระ :
             </Text>
             <Text size={16} css={{ color: "$accents8" }}>
-              00.00 บาท
+              {numberFormat(
+                carts.reduce(
+                  (prev: number, cur: cartItemType) =>
+                    prev + cur.qty * cur.product?.price!,
+                  0
+                )
+              )}{" "}
+              บาท
             </Text>
           </Row>
           <Card.Divider />

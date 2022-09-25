@@ -11,7 +11,13 @@
   "dependencies": {
     "@nextui-org/react": "^1.0.0-beta.10",
     "@reduxjs/toolkit": "^1.8.5",
+    "@types/cookie": "^0.5.1",
+    "@types/js-cookie": "^3.0.2",
     "axios": "^0.27.2",
+    "cookie": "^0.5.0",
+    "cookies-next": "^2.1.1",
+    "js-cookie": "^3.0.1",
+    "js-cookies": "^1.0.4",
     "moment": "^2.29.4",
     "next": "12.2.5",
     "rc-slider": "^10.0.1",
@@ -22,7 +28,8 @@
     "react-icons": "^4.4.0",
     "react-query": "^3.39.2",
     "react-redux": "^8.0.2",
-    "react-slider": "^2.0.3"
+    "react-slider": "^2.0.3",
+    "typescript-cookie": "^1.0.4"
   },
   "devDependencies": {
     "@types/node": "18.7.15",

@@ -1,16 +1,15 @@
 import type { NextPage } from "next";
-import {
-  Container,
-  Grid
-} from "@nextui-org/react";
+import { Container, Grid } from "@nextui-org/react";
 
 import React from "react";
 import FilterProductSection from "../../components/product/FilterProductSection";
 import ProductListSection from "../../components/product/ProductListSection";
 import SortSection from "../../components/product/SortSection";
+import AlertModal from "../../components/modals/alertModal";
+
 
 const ProductPage: NextPage = () => {
-
+ 
   return (
     <Container css={{ mt: "$15", "@xl": { px: "12%" } }}>
       <Grid.Container gap={2} justify="center">
@@ -37,6 +36,7 @@ const ProductPage: NextPage = () => {
           <ProductListSection />
         </Grid>
       </Grid.Container>
+      <AlertModal/>
     </Container>
   );
 };

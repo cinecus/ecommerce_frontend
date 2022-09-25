@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import React, { ReactNode, useEffect } from "react";
 import {
   Navbar as NavbarNextUI,
   Link,
@@ -7,6 +7,7 @@ import {
   Dropdown,
   Button,
   Row,
+  Badge,
 } from "@nextui-org/react";
 import {
   FaGoogle,
@@ -22,24 +23,26 @@ import { RiCreativeCommonsLine } from "react-icons/ri";
 import { useRouter } from "next/router";
 import SignInModal from "./modals/signinModal";
 import SignUpModal from "./modals/signupModal";
+import RequestResetPasswordModal from "./modals/requestResetPasswordModal";
+import { useGetMe, useSignOut } from "../hooks";
+import { useAppDispatch, useAppSelector } from "../store/store";
+import { toggleModal } from "../store/slices/modalSlice";
+import { useGetCart } from "../hooks/CartHook";
+import ResetPasswordModal from "./modals/resetPasswordModal";
 
 const Navbar = () => {
   const router = useRouter();
-  const [isAuth, setIsAuth] = React.useState<boolean>(true);
-  const [visible, setVisible] = React.useState<{
-    signin: boolean;
-    signup: boolean;
-  }>({
-    signin: false,
-    signup: false,
-  });
-  const handler = (type: "signin" | "signup") =>
-    setVisible({ ...visible, [type]: true });
-
-  const closeHandler = (type: "signin" | "signup") => {
-    setVisible({ ...visible, [type]: false });
-  };
-
+  const dispatch = useAppDispatch();
+  const { me } = useAppSelector((state) => state.auth);
+  const { carts } = useAppSelector((state) => state.cart);
+  const { data, isLoading, isError } = useGetMe();
+  const { data: cartData } = useGetCart();
+  const { mutate } = useSignOut();
+  useEffect(() => {
+    if (router.query?.resetToken) {
+      dispatch(toggleModal({ key: "isResetPasswordShow", status: "open" }));
+    }
+  }, [router]);
   return (
     <NavbarNextUI isBordered variant="floating">
       <NavbarNextUI.Brand
@@ -76,7 +79,7 @@ const Navbar = () => {
         {/* <NavbarNextUI.Link href="/about">เกี่ยวกับ</NavbarNextUI.Link>
         <NavbarNextUI.Link href="/feature">ฟีเจอร์</NavbarNextUI.Link> */}
       </NavbarNextUI.Content>
-      {!isAuth ? (
+      {!me ? (
         <>
           {/* Un Authen */}
           <NavbarNextUI.Content hideIn={"xs"} gap="$12">
@@ -89,7 +92,9 @@ const Navbar = () => {
                   color: "$colors$primary",
                 }}
                 bordered
-                onClick={() => handler("signin")}
+                onPress={() =>
+                  dispatch(toggleModal({ key: "isSigninShow", status: "open" }))
+                }
                 auto
               >
                 <Row
@@ -108,7 +113,12 @@ const Navbar = () => {
               </Button>
             </NavbarNextUI.Item>
             <NavbarNextUI.Item>
-              <Button onClick={() => handler("signup")} auto>
+              <Button
+                onPress={() =>
+                  dispatch(toggleModal({ key: "isSignupShow", status: "open" }))
+                }
+                auto
+              >
                 ลงทะเบียน
               </Button>
             </NavbarNextUI.Item>
@@ -123,19 +133,33 @@ const Navbar = () => {
                 jc: "flex-end",
               },
             }}
-          
             gap="$12"
           >
-            <NavbarNextUI.Link href="/product"  hideIn={"xs"}>ดูสินค้า</NavbarNextUI.Link>
-            <NavbarNextUI.Link href="/feature"   hideIn={"xs"}>ฟีเจอร์</NavbarNextUI.Link>
-            <NavbarNextUI.Link href="/cart">
-              <FaCartArrowDown size={24} />
+            <NavbarNextUI.Link href="/product" hideIn={"xs"}>
+              ดูสินค้า
             </NavbarNextUI.Link>
-            <NavbarNextUI.Link hideIn={"xs"}>Customer name</NavbarNextUI.Link>
+            <NavbarNextUI.Link href="/feature" hideIn={"xs"}>
+              ฟีเจอร์
+            </NavbarNextUI.Link>
+            <NavbarNextUI.Link href="/cart">
+              <Badge
+                color="error"
+                content={carts.reduce(
+                  (p: number, c: { qty: number }) => p + c.qty,
+                  0
+                )}
+                shape="rectangle"
+              >
+                <FaCartArrowDown size={24} />
+              </Badge>
+            </NavbarNextUI.Link>
+            <NavbarNextUI.Link hideIn={"xs"}>
+              {me.firstName} {me.lastName}
+            </NavbarNextUI.Link>
             <Dropdown placement="bottom-right">
               <NavbarNextUI.Item>
                 <Dropdown.Trigger>
-                  <Avatar size="lg" pointer text="UserName" />
+                  <Avatar size="lg" pointer text={me.firstName} />
                 </Dropdown.Trigger>
               </NavbarNextUI.Item>
               <Dropdown.Menu
@@ -148,11 +172,15 @@ const Navbar = () => {
                     Signed in as
                   </Text>
                   <Text b color="inherit" css={{ d: "flex" }}>
-                    zoey@example.com
+                    {me.email ||
+                      me.thirdPartyEmail ||
+                      me.firstName + " " + me.lastName}
                   </Text>
                 </Dropdown.Item>
                 <Dropdown.Item key="logout" withDivider color="error">
-                  Log Out
+                  <Button light onPress={() => mutate()}>
+                    Log Out
+                  </Button>
                 </Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>
@@ -166,7 +194,7 @@ const Navbar = () => {
               <Button light auto icon={<FaHamburger size={20} />} size={"xs"} />
             </Dropdown.Trigger>
           </NavbarNextUI.Item>
-          {isAuth ? (
+          {me ? (
             <Dropdown.Menu
               aria-label="User menu actions"
               color="secondary"
@@ -224,9 +252,13 @@ const Navbar = () => {
       </NavbarNextUI.Content>
 
       {/* Modal Sign In */}
-      <SignInModal visible={visible} closeHandler={closeHandler}/>
+      <SignInModal />
       {/* Modal Sign Up */}
-      <SignUpModal  visible={visible} closeHandler={closeHandler}/>
+      <SignUpModal />
+      {/* Modal Request Reset Password */}
+      <RequestResetPasswordModal />
+      {/* Modal Reset Password */}
+      <ResetPasswordModal token={router.query?.resetToken as string}/>
     </NavbarNextUI>
   );
 };
@@ -251,5 +283,3 @@ export const AcmeLogo = () => (
     />
   </svg>
 );
-
-

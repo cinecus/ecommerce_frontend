@@ -7,9 +7,19 @@ import {
   Row,
   Button,
   Popover,
+  Modal,
   Image,
 } from "@nextui-org/react";
 import { FaPlus, FaMinus, FaTrashAlt } from "react-icons/fa";
+import {
+  useAddToCart,
+  useDecreaseCart,
+  useGetCart,
+  useDeleteCartItem,
+} from "../../hooks/CartHook";
+import { useAppSelector } from "../../store/store";
+import { cartItemType } from "../../types";
+import { numberFormat } from "../../function";
 
 type CartItemType = {
   id: string;
@@ -105,12 +115,26 @@ const TableCart = () => {
       subtotal: "200",
     },
   ];
-  const renderCell = (record: CartItemType, columnKey: ColumnKeyType) => {
+  const { data, isLoading, isError } = useGetCart();
+  const { mutate: mutateAddtoCart } = useAddToCart();
+  const { mutate: mutateDecreaseCart } = useDecreaseCart();
+  const { mutate: mutateDeleteCartItem } = useDeleteCartItem();
+  const { carts } = useAppSelector((state) => state.cart);
+  const [visible, setVisible] = React.useState(false);
+  const [deletedCartID,setDeletedCartID] = React.useState<string | null>(null);
+  const handler = (cartID:string) => {
+    setVisible(true)
+    setDeletedCartID(cartID)
+  }
+  const closeHandler = () => {
+    setVisible(false);
+  };
+  const renderCell = (record: cartItemType, columnKey: ColumnKeyType) => {
     switch (columnKey) {
       case "id":
         return (
           <Row justify="center">
-            <Text>{record.id}</Text>
+            <Text>{record.key}</Text>
           </Row>
         );
       case "name":
@@ -118,14 +142,14 @@ const TableCart = () => {
           <Grid.Container gap={2} justify="center">
             <Grid>
               <Image
-                src={record.img}
+                src={record.product?.image as string}
                 objectFit="cover"
                 width={120}
                 height={100}
                 alt={"ชื่อสินค้า"}
               />
               <Row justify="center">
-                <Text>{record.name}</Text>
+                <Text>{record.product?.name}</Text>
               </Row>
             </Grid>
           </Grid.Container>
@@ -133,7 +157,7 @@ const TableCart = () => {
       case "price":
         return (
           <Row justify="center">
-            <Text>{record.price}.00</Text>
+            <Text>{numberFormat(record.product?.price as number)}</Text>
           </Row>
         );
       case "qty":
@@ -145,52 +169,42 @@ const TableCart = () => {
               alignItems: "center",
             }}
           >
-            <Button size={"xs"} light icon={<FaMinus size={16} />} />
+            <Button
+              size={"xs"}
+              light
+              icon={<FaMinus size={16} />}
+              onPress={() => {
+                if (record.qty !== 1) {
+                  mutateDecreaseCart({ productID: record.product?._id! });
+                }
+              }}
+            />
 
             <Text>{record.qty}</Text>
 
-            <Button size={"xs"} light icon={<FaPlus size={16} />} />
+            <Button
+              size={"xs"}
+              light
+              icon={<FaPlus size={16} />}
+              onPress={() =>
+                mutateAddtoCart({ productID: record.product?._id! })
+              }
+            />
           </Row>
         );
       case "subtotal":
         return (
           <Row justify="center">
-            <Text>{record.subtotal}.00</Text>
+            <Text>{numberFormat(record.product?.price! * record.qty)}</Text>
           </Row>
         );
       case "action":
+        // const [isOpen,setIsOpen] = React.useState(false)
         return (
-          <Popover placement={"top-right"}>
-            <Popover.Trigger>
-              <Button size={"xs"} auto ghost icon={<FaTrashAlt />} />
-            </Popover.Trigger>
-            <Popover.Content>
-              <Grid.Container
-                css={{
-                  borderRadius: "14px",
-                  padding: "$10",
-                  maxWidth: "280px",
-                  gap: "$10",
-                }}
-              >
-                <Row justify="center" align="center">
-                  <Text b>ลบสินค้าออกจากตะกร้าหรือไม่ ?</Text>
-                </Row>
-                <Grid.Container justify="flex-end" alignContent="center">
-                  <Grid>
-                    <Button size="sm" light auto>
-                      ยกเลิก
-                    </Button>
-                  </Grid>
-                  <Grid>
-                    <Button size="sm" shadow color="error" auto>
-                      ลบ
-                    </Button>
-                  </Grid>
-                </Grid.Container>
-              </Grid.Container>
-            </Popover.Content>
-          </Popover>
+          <div>
+              <Button size={"xs"} auto ghost icon={<FaTrashAlt />} onPress={()=>handler(record._id)}/>
+             
+          </div>
         );
       default:
         return <Text>{record[columnKey]}</Text>;
@@ -216,25 +230,50 @@ const TableCart = () => {
             </Table.Column>
           )}
         </Table.Header>
-        <Table.Body items={rows}>
-          {(item) => (
-            <Table.Row key={item.key}>
+        <Table.Body items={carts}>
+          {(item: cartItemType) => (
+            <Table.Row>
               {(columnKey) => (
-                <Table.Cell key={item.key}>
+                <Table.Cell>
                   {renderCell(item, columnKey as ColumnKeyType)}
                 </Table.Cell>
               )}
             </Table.Row>
           )}
         </Table.Body>
-        <Table.Pagination
+        {/* <Table.Pagination
           shadow
           noMargin
           align="center"
           rowsPerPage={3}
           onPageChange={(page) => console.log({ page })}
-        />
+        /> */}
       </Table>
+      <Modal
+        closeButton
+        preventClose
+        aria-labelledby="modal-title"
+        open={visible}
+        onClose={closeHandler}
+
+      >
+        <Modal.Header>
+          <Text id="modal-title" b size={18}>
+            ต้องการลบสินค้ารายการนี้หรือไม่ ?
+          </Text>
+        </Modal.Header>
+        <Modal.Footer>
+          <Button auto flat  onPress={closeHandler}>
+            ยกเลิก
+          </Button>
+          <Button auto onPress={()=>{
+            closeHandler()
+            mutateDeleteCartItem({cartID:deletedCartID as string})
+          }} color="error">
+            ลบ
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 };

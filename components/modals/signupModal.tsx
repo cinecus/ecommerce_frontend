@@ -1,17 +1,48 @@
-import React,{FC} from "react";
-import { Modal, Text, Input, Row, Button ,Col} from "@nextui-org/react";
+import React, { FC, useRef } from "react";
+import {
+  Modal,
+  Text,
+  Input,
+  Row,
+  Button,
+  Col,
+  Loading,
+} from "@nextui-org/react";
 import { FaFacebook, FaGithub, FaGoogle, FaUser } from "react-icons/fa";
+import { useAppDispatch, useAppSelector } from "../../store/store";
+import { toggleModal } from "../../store/slices/modalSlice";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { signupBodyType } from "../../types";
+import { useSignUp } from "../../hooks";
 
-const SignUpModal: FC<{
-    visible: { signin: boolean; signup: boolean };
-    closeHandler: (type: "signin" | "signup") => void;
-  }>  = ({ visible, closeHandler }) => {
+const SignUpModal = () => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    watch,
+  } = useForm<signupBodyType>();
+  const password = useRef({});
+  password.current = watch("password", "");
+  const dispatch = useAppDispatch();
+  const { isSignupShow } = useAppSelector((state) => state.modal);
+  const { mutate, isLoading, isError, error } = useSignUp();
+  const handleSignUp: SubmitHandler<signupBodyType> = (data) => {
+    mutate({
+      firstName: data.firstName,
+      lastName: data.lastName,
+      password: data.password,
+      email: data.email,
+    });
+  };
   return (
     <Modal
       closeButton
       aria-labelledby="modal-title"
-      open={visible.signup}
-      onClose={() => closeHandler("signup")}
+      open={isSignupShow}
+      onClose={() =>
+        dispatch(toggleModal({ key: "isSignupShow", status: "close" }))
+      }
       blur
     >
       <Modal.Header>
@@ -22,7 +53,7 @@ const SignUpModal: FC<{
           </Text>
         </Text>
       </Modal.Header>
-      <Modal.Body>
+      <Modal.Body onSubmit={handleSubmit(handleSignUp)} as="form">
         <Row>
           <Col>
             <Input
@@ -33,7 +64,11 @@ const SignUpModal: FC<{
               size="lg"
               placeholder="ชื่อ"
               contentLeft={<FaUser fill="currentColor" />}
+              {...register("firstName", {
+                required: "กรุณา กรอกชื่อ !",
+              })}
             />
+            <Text color="error">{errors.firstName?.message}</Text>
           </Col>
           <Col offset={0.5}>
             <Input
@@ -44,7 +79,11 @@ const SignUpModal: FC<{
               size="lg"
               placeholder="นามสกุล"
               contentLeft={<FaUser fill="currentColor" />}
+              {...register("lastName", {
+                required: "กรุณา กรอกนามสกุล !",
+              })}
             />
+            <Text color="error">{errors.lastName?.message}</Text>
           </Col>
         </Row>
         <Input
@@ -55,7 +94,15 @@ const SignUpModal: FC<{
           size="lg"
           placeholder="Email"
           contentLeft={<Mail fill="currentColor" />}
+          {...register("email", {
+            pattern: {
+              value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+              message: "Email is in wrong format.",
+            },
+            required: "กรุณา อีเมล !",
+          })}
         />
+        <Text color="error">{errors.email?.message}</Text>
         <Input
           clearable
           bordered
@@ -63,31 +110,49 @@ const SignUpModal: FC<{
           color="primary"
           size="lg"
           placeholder="Password"
+          type="password"
           contentLeft={<Password fill="currentColor" />}
+          {...register("password", {
+            required: "กรุณา รหัสผ่าน !",
+            minLength: {
+              value: 6,
+              message: "รหัสผ่าน อย่างน้อย 6 ตัวอักษร",
+            },
+          })}
         />
+        <Text color="error">{errors.password?.message}</Text>
+
         <Input
           clearable
           bordered
           fullWidth
           color="primary"
           size="lg"
+          type="password"
           placeholder="Re-Password"
           contentLeft={<Password fill="currentColor" />}
+          {...register("repassword", {
+            validate: (value) =>
+              value === password.current || "กรุณากรอก รหัสผ่าน ให้ตรงกัน",
+          })}
         />
-        <Row justify="space-between">
-          <Text size={14}>Forgot password?</Text>
-        </Row>
-        <Button auto>
-          <Row
-            css={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              gap: "$5",
-            }}
-          >
-            <Text size={16}>ลงทะเบียน</Text>
-          </Row>
+        <Text color="error">{errors.repassword?.message}</Text>
+
+        <Button auto type="submit" as="button">
+          {isLoading ? (
+            <Loading color={"secondary"} gradientBackground={null} />
+          ) : (
+            <Row
+              css={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: "$5",
+              }}
+            >
+              <Text size={16}>ลงทะเบียน</Text>
+            </Row>
+          )}
         </Button>
         <Row justify="center">
           <Text size={14}>- OR -</Text>

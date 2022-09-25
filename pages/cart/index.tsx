@@ -7,7 +7,7 @@ import TableCart from "../../components/cart/TableCartSection";
 import SummarySection from "../../components/cart/SummarySection";
 
 
-const CartPage = () => {
+const CartPage:NextPage = () => {
   return (
     <Container css={{ mt: "$15","@xl": { px: "12%" } }}>
       <Grid.Container gap={2} justify="center">

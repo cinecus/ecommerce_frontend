@@ -9,36 +9,59 @@ import {
 } from "@nextui-org/react";
 import Slider from "rc-slider";
 import "rc-slider/assets/index.css";
+import { useAppDispatch, useAppSelector } from "../../store/store";
+import {
+  filterProduct,
+  handleChangeFilterPrice,
+  handleChangeFilterProduct,
+  resetFilter,
+} from "../../store/slices/productSlice";
 
 const FilterProductSection = () => {
   const [selected, setSelected] = React.useState(true);
+  const dispatch = useAppDispatch();
+  const { filteredProduct, filteredPrice } = useAppSelector(
+    (state) => state.product
+  );
   return (
     <Container>
       <Collapse.Group bordered accordion={false}>
         <Collapse title="ตัวกรองสินค้า">
           <Row>
+          </Row>
+          <Row>
             <Checkbox
-              isSelected={selected}
+              isSelected={filteredProduct.new}
               color="primary"
-              onChange={setSelected}
+              onChange={(e) =>
+                dispatch(handleChangeFilterProduct({ type: "new", value: e }))
+              }
             >
               มาใหม่
             </Checkbox>
           </Row>
           <Row>
             <Checkbox
-              isSelected={selected}
+              isSelected={filteredProduct.bestseller}
               color="primary"
-              onChange={setSelected}
+              onChange={(e) =>
+                dispatch(
+                  handleChangeFilterProduct({ type: "bestseller", value: e })
+                )
+              }
             >
               ขายดี
             </Checkbox>
           </Row>
           <Row>
             <Checkbox
-              isSelected={selected}
+              isSelected={filteredProduct.suggest}
               color="primary"
-              onChange={setSelected}
+              onChange={(e) =>
+                dispatch(
+                  handleChangeFilterProduct({ type: "suggest", value: e })
+                )
+              }
             >
               แนะนำ
             </Checkbox>
@@ -56,9 +79,9 @@ const FilterProductSection = () => {
                 max={2000}
                 step={500}
                 onChange={(e) => {
-                  console.log("e", e);
+                  dispatch(handleChangeFilterPrice(e));
                 }}
-                defaultValue={[1000, 2000]}
+                value={[filteredPrice.min, filteredPrice.max]}
                 dots
                 marks={{
                   500: <Text size={"$sm"}>500</Text>,
@@ -75,12 +98,13 @@ const FilterProductSection = () => {
         </Collapse>
       </Collapse.Group>
       <Row css={{ mt: "$10" }}>
-        <Button css={{ width: "100%" }}>กรองสินค้า</Button>
+        <Button css={{ width: "100%" }} onPress={()=>dispatch(filterProduct(null))}>กรองสินค้า</Button>
       </Row>
       <Row css={{ mt: "$5" }}>
         <Button
           css={{ width: "100%", background: "$white", color: "$primary" }}
           bordered
+          onPress={()=>dispatch(resetFilter(null))}
         >
           ล้างค่า
         </Button>

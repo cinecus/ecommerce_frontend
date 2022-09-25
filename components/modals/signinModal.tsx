@@ -1,17 +1,40 @@
 import React, { FC } from "react";
-import { Modal, Text, Input, Row, Button } from "@nextui-org/react";
+import {
+  Modal,
+  Text,
+  Input,
+  Row,
+  Button,
+  Container,
+  Loading,
+} from "@nextui-org/react";
 import { FaFacebook, FaGithub, FaGoogle, FaSignInAlt } from "react-icons/fa";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { useSignIn } from "../../hooks";
+import { signinBodyType } from "../../types";
+import { useAppDispatch, useAppSelector } from "../../store/store";
+import { toggleModal } from "../../store/slices/modalSlice";
 
-const SignInModal: FC<{
-  visible: { signin: boolean; signup: boolean };
-  closeHandler: (type: "signin" | "signup") => void;
-}> = ({ visible, closeHandler }) => {
+const SignInModal = () => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<signinBodyType>();
+  const dispatch = useAppDispatch();
+  const { mutate, isLoading, isError, error } = useSignIn();
+  const { isSigninShow } = useAppSelector((state) => state.modal);
+  const handleSignIn: SubmitHandler<signinBodyType> = (data) => {
+    mutate(data);
+  };
   return (
     <Modal
       closeButton
       aria-labelledby="modal-title"
-      open={visible.signin}
-      onClose={() => closeHandler("signin")}
+      open={isSigninShow}
+      onClose={() =>
+        dispatch(toggleModal({ key: "isSigninShow", status: "close" }))
+      }
       blur
     >
       <Modal.Header>
@@ -22,8 +45,9 @@ const SignInModal: FC<{
           </Text>
         </Text>
       </Modal.Header>
-      <Modal.Body>
+      <Modal.Body onSubmit={handleSubmit(handleSignIn)} as="form">
         <Input
+          aria-label="email"
           clearable
           bordered
           fullWidth
@@ -31,37 +55,76 @@ const SignInModal: FC<{
           size="lg"
           placeholder="Email"
           contentLeft={<Mail fill="currentColor" />}
+          {...register("email", {
+            pattern: {
+              value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+              message: "Email is in wrong format.",
+            },
+            required: "กรุณา อีเมล !",
+          })}
         />
+        <Text color="error">{errors.email?.message}</Text>
         <Input
+          aria-label="password"
           clearable
           bordered
           fullWidth
           color="primary"
           size="lg"
           placeholder="Password"
+          type="password"
           contentLeft={<Password fill="currentColor" />}
+          {...register("password", {
+            required: "กรุณา รหัสผ่าน !",
+          })}
         />
-        <Row justify="space-between">
-          <Text size={14}>Forgot password?</Text>
-        </Row>
-        <Button auto>
-          <Row
-            css={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              gap: "$5",
+        <Text color="error">{errors.password?.message}</Text>
+        <Row justify="flex-end">
+          <Text
+            size={14}
+            onClick={() => {
+              dispatch(toggleModal({ key: "isSigninShow", status: "close" }));
+              dispatch(
+                toggleModal({
+                  key: "isRequestResetPasswordShow",
+                  status: "open",
+                })
+              );
             }}
+            as="a"
           >
-            <FaSignInAlt size={18} color="white" />
-            <Text size={16}>เข้าสู่ระบบ</Text>
-          </Row>
+            Forgot password?
+          </Text>
+        </Row>
+        <Button auto type="submit" as="button">
+          {isLoading ? (
+            <Loading color={"secondary"} gradientBackground={null} />
+          ) : (
+            <Row
+              css={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: "$5",
+              }}
+            >
+              <FaSignInAlt size={18} color="white" />
+              <Text size={16}>เข้าสู่ระบบ</Text>
+            </Row>
+          )}
         </Button>
+        {isError ? <Text color="error">{error.message}</Text> : null}
         <Row justify="center">
           <Text size={14}>- OR -</Text>
         </Row>
 
-        <Button css={{ borderColor: "$white", bc: "$red600" }} auto bordered>
+        <Button
+          css={{ borderColor: "$white", bc: "$red600" }}
+          auto
+          bordered
+          as="a"
+          href={process.env.NEXT_PUBLIC_GOOGLE_LOGIN_URI}
+        >
           <Row
             css={{
               display: "flex",
@@ -78,6 +141,8 @@ const SignInModal: FC<{
           css={{ bc: "$colors$facebook", borderColor: "$white" }}
           auto
           bordered
+          as="a"
+          href={process.env.NEXT_PUBLIC_FACEBOOK_LOGIN_URI}
         >
           <Row
             css={{
@@ -91,7 +156,13 @@ const SignInModal: FC<{
             <Text size={16}>เข้าสู่ระบบด้วย facebook account</Text>
           </Row>
         </Button>
-        <Button css={{ bc: "$black", borderColor: "$white" }} auto bordered>
+        <Button
+          css={{ bc: "$black", borderColor: "$white" }}
+          auto
+          bordered
+          as="a"
+          href={process.env.NEXT_PUBLIC_GITHUB_LOGIN_URI}
+        >
           <Row
             css={{
               display: "flex",

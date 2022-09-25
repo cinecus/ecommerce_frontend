@@ -1,4 +1,6 @@
-import type { NextPage } from "next";
+import type {
+  NextPage
+} from "next";
 import {
   Container,
   Row,
@@ -9,9 +11,10 @@ import {
   Button,
 } from "@nextui-org/react";
 import { FaGithub } from "react-icons/fa";
-import { frontendTech,backendTech,otherTech } from "../constant";
+import { frontendTech, backendTech, otherTech } from "../constant";
 
 const Home: NextPage = () => {
+
   return (
     <Container css={{ mt: "$15", "@xl": { px: "12%" } }}>
       <Grid.Container gap={2} justify="center">
