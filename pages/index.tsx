@@ -50,7 +50,7 @@ const Home: NextPage = () => {
                 css={{ bc: "$black", borderColor: "$white", color: "$white" }}
                 auto
               >
-                <a href="https://github.com/cinecus" target="_blank">
+                <a href="https://github.com/cinecus" target="_blank" rel="noreferrer">
                   <Text size={20}>ดูผลงานอื่น ๆ</Text>
                 </a>
               </Button>

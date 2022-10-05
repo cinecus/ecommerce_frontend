@@ -27,7 +27,7 @@ const SummarySection = () => {
           </Row>
           {carts.map((cartItem: cartItemType) => {
             return (
-              <Row justify="space-between">
+              <Row justify="space-between" key={cartItem._id}>
                 <Col span={4}>
                   <Text size={16} css={{ color: "$accents8" }}>
                     {cartItem.qty}

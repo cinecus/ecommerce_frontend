@@ -7,12 +7,13 @@ const footer = () => {
     <Container css={{ mt: "$20", mb: "$10" }}>
       <Row justify="center">Cinecus CC • © 2022 • CC Store</Row>
       <Row justify="center" css={{ mt: "$3", gap: "$5" }}>
-        <a href="https://github.com/cinecus" target="_blank">
+        <a href="https://github.com/cinecus" target="_blank"  rel="noreferrer">
           <FaGithub size={24} />
         </a>
         <a
           href="https://www.linkedin.com/in/chananon-chantaratin-7b0825196"
           target="_blank"
+          rel="noreferrer"
         >
           <FaLinkedin size={24} />
         </a>
