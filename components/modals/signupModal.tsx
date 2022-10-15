@@ -157,8 +157,13 @@ const SignUpModal = () => {
         <Row justify="center">
           <Text size={14}>- OR -</Text>
         </Row>
-
-        <Button css={{ borderColor: "$white", bc: "$red600" }} auto bordered>
+        <Button
+          css={{ borderColor: "$white", bc: "$red600" }}
+          auto
+          bordered
+          as="a"
+          href={process.env.NEXT_PUBLIC_GOOGLE_LOGIN_URI}
+        >
           <Row
             css={{
               display: "flex",
@@ -175,6 +180,8 @@ const SignUpModal = () => {
           css={{ bc: "$colors$facebook", borderColor: "$white" }}
           auto
           bordered
+          as="a"
+          href={process.env.NEXT_PUBLIC_FACEBOOK_LOGIN_URI}
         >
           <Row
             css={{
@@ -188,7 +195,13 @@ const SignUpModal = () => {
             <Text size={16}>เข้าสู่ระบบด้วย facebook account</Text>
           </Row>
         </Button>
-        <Button css={{ bc: "$black", borderColor: "$white" }} auto bordered>
+        <Button
+          css={{ bc: "$black", borderColor: "$white" }}
+          auto
+          bordered
+          as="a"
+          href={process.env.NEXT_PUBLIC_GITHUB_LOGIN_URI}
+        >
           <Row
             css={{
               display: "flex",
