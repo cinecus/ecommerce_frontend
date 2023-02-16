@@ -42,7 +42,7 @@ const Home: NextPage = () => {
                 icon={<FaGithub size={20} />}
                 auto
               >
-                <a href="">
+                <a href="https://github.com/cinecus">
                   <Text size={20}>Github</Text>
                 </a>
               </Button>

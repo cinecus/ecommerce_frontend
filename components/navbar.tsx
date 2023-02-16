@@ -236,12 +236,30 @@ const Navbar = () => {
 
               <Dropdown.Section>
                 <Dropdown.Item key="signup" css={{ height: "$18" }}>
-                  <Text b color="inherit" css={{ d: "flex" }}>
+                  <Text
+                    b
+                    color="inherit"
+                    css={{ d: "flex" }}
+                    onClick={() =>
+                      dispatch(
+                        toggleModal({ key: "isSignupShow", status: "open" })
+                      )
+                    }
+                  >
                     ลงทะเบียน
                   </Text>
                 </Dropdown.Item>
                 <Dropdown.Item key="signin" css={{ height: "$18" }}>
-                  <Text b color="inherit" css={{ d: "flex" }}>
+                  <Text
+                    b
+                    color="inherit"
+                    css={{ d: "flex" }}
+                    onClick={() =>
+                      dispatch(
+                        toggleModal({ key: "isSigninShow", status: "open" })
+                      )
+                    }
+                  >
                     เข้าสู่ระบบ
                   </Text>
                 </Dropdown.Item>
@@ -258,7 +276,7 @@ const Navbar = () => {
       {/* Modal Request Reset Password */}
       <RequestResetPasswordModal />
       {/* Modal Reset Password */}
-      <ResetPasswordModal token={router.query?.resetToken as string}/>
+      <ResetPasswordModal token={router.query?.resetToken as string} />
     </NavbarNextUI>
   );
 };

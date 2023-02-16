@@ -8,7 +8,7 @@ import {
   Container,
   Loading,
 } from "@nextui-org/react";
-import { FaFacebook, FaGithub, FaGoogle, FaSignInAlt } from "react-icons/fa";
+import { FaFacebook, FaGithub, FaGoogle, FaLine, FaSignInAlt } from "react-icons/fa";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useSignIn } from "../../hooks";
 import { signinBodyType } from "../../types";
@@ -173,6 +173,26 @@ const SignInModal = () => {
           >
             <FaGithub size={16} color="white" />
             <Text size={16}>เข้าสู่ระบบด้วย github account</Text>
+          </Row>
+        </Button>
+
+        <Button
+          css={{ bc: "#06C755", borderColor: "$white" }}
+          auto
+          bordered
+          as="a"
+          href={process.env.NEXT_PUBLIC_LINE_LOGIN_URI}
+        >
+          <Row
+            css={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: "$5",
+            }}
+          >
+            <FaLine size={16} color="white" />
+            <Text size={16}>เข้าสู่ระบบด้วย LINE account</Text>
           </Row>
         </Button>
       </Modal.Body>
